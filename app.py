@@ -188,7 +188,7 @@ elif choice == "9. Generosidade por Continente":
            fig, ax = plt.subplots(figsize=(10, 6))
            sns.boxplot(
                data=df_valid,
-               x='Continent',
+               x='continent',
                y='Generosity',
                palette='Set2'  # ou outra paleta que você preferir
            )
