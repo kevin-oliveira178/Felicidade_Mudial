@@ -173,16 +173,16 @@ elif choice == "8. Heatmap de Correlações":
 
 
 elif choice == "9. Generosidade por Continente":
-    df_valid = df[df['Generosity'].notnull() & df['Continent'].notnull()]  # Corrigido para 'continent'
+    df_valid = df[df['Generosity'].notnull() & df['continent'].notnull()]  # Corrigido para 'continent'
 
     if not df_valid.empty:
          # Filtrando dados válidos
        
-       df_valid = df[df['Generosity'].notnull() & df['Continent'].notnull()]
+       df_valid = df[df['Generosity'].notnull() & df['continent'].notnull()]
 
        # Verificando a contagem de países por continente
        st.write("Contagem de países por continente (dados filtrados):")
-       st.write(df_valid['Continent'].value_counts())
+       st.write(df_valid['continent'].value_counts())
 
        if not df_valid.empty:
            fig, ax = plt.subplots(figsize=(10, 6))
