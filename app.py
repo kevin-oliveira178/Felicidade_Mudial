@@ -171,8 +171,9 @@ elif choice == "8. Heatmap de Correlações":
     plt.tight_layout()
     st.pyplot(fig)
 
+
 elif choice == "9. Generosidade por Continente":
-    df_valid = df[df['Generosity'].notnull() & df['continent'].notnull()]  # Corrigido para 'continent'
+    df_valid = df[df['Generosity'].notnull() & df['Continent'].notnull()]  # Corrigido para 'continent'
 
     if not df_valid.empty:
          # Filtrando dados válidos
