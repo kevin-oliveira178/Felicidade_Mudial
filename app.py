@@ -1,111 +1,179 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.colors import LinearSegmentedColormap
+from scipy.stats import skew, kurtosis
+import plotly.express as px
 from scipy.stats import f_oneway
 
-# === Estilo ===
-colors = ["#ff6b6b", "#feca57", "#48dbfb", "#1dd1a1", "#5f27cd", "#00d2d3"]
-accent_color = "#10ac84"
+st.set_page_config(page_title="Felicidade Mundial 2019", layout="wide")
 
-# Configuração da página
-st.set_page_config(page_title="Análise Felicidade", layout="wide")
+@st.cache_data
+def load_and_prepare_data():
+    # Carrega o dataset
+    df = pd.read_csv("2019.csv")
 
-# === Navegação ===
-secoes = [
+    # Criar Score Category com base nos tercis do Score
+    tercis = df['Score'].quantile([0.33, 0.66])
+    def categorize(score):
+        if score <= tercis[0.33]:
+            return "Baixo"
+        elif score <= tercis[0.66]:
+            return "Médio"
+        else:
+            return "Alto"
+    df['Score Category'] = df['Score'].apply(categorize)
+
+    # Criar variável Riqueza baseado no GDP per capita (mediana)
+    median_gdp = df['GDP per capita'].median()
+    df['Riqueza'] = df['GDP per capita'].apply(lambda x: "Rico" if x >= median_gdp else "Pobre")
+
+    # Verifica se 'Regional indicator' existe, se não cria coluna padrão
+    if 'Regional indicator' not in df.columns:
+        df['Regional indicator'] = "Desconhecido"
+
+    # Mapear Continente a partir do Regional indicator
+    continent_map = {
+        'Western Europe': 'Europa', 'North America': 'América',
+        'Sub-Saharan Africa': 'África', 'Central and Eastern Europe': 'Europa',
+        'Middle East and North Africa': 'África/Oriente Médio',
+        'Latin America and Caribbean': 'América Latina',
+        'Southeast Asia': 'Ásia', 'East Asia': 'Ásia'
+    }
+    df['Continent'] = df['Regional indicator'].map(continent_map).fillna("Outro")
+
+    return df
+
+df = load_and_prepare_data()
+
+# Barra lateral para navegação
+st.sidebar.title("🔎 Navegação")
+pages = [
     "Introdução",
-    "Estatísticas Descritivas",
-    "Histograma e Tendências",
-    "Correlação",
-    "Generosidade por Continente",
-    "Liberdade por Categoria",
-    "Exportar Dados"
+    "1. Distribuição do Score",
+    "2. Histogramas e Boxplots",
+    "3. Assimetria e Curtose",
+    "4. Score Category",
+    "5. Score x Riqueza",
+    "6. GDP vs Vida Saudável",
+    "7. Dispersão: GDP x Score",
+    "8. Heatmap de Correlações",
+    "9. Generosidade por Continente",
+    "10. Liberdade x Categoria de Felicidade"
 ]
-selecionado = st.sidebar.radio("Escolha uma seção", secoes)
+choice = st.sidebar.radio("Escolha uma seção:", pages)
 
-# === Leitura dos dados ===
-df = pd.read_csv("2019.csv")
-
-# Categorias
-tercis = df["Score"].quantile([0.3333, 0.6667])
-df["Score_Category"] = pd.cut(df["Score"],
-                              bins=[-np.inf, tercis[0.3333], tercis[0.6667], np.inf],
-                              labels=["Baixo", "Médio", "Alto"])
-
-# Continente
-try:
-    import pycountry_convert as pc
-    def get_continent(country):
-        try:
-            code = pc.country_name_to_country_alpha2(country)
-            cont = pc.country_alpha2_to_continent_code(code)
-            return {
-                'AF': 'Africa', 'NA': 'North America', 'OC': 'Oceania',
-                'AN': 'Antarctica', 'AS': 'Asia', 'EU': 'Europe', 'SA': 'South America'
-            }.get(cont, 'Unknown')
-        except:
-            return 'Unknown'
-    df['continent'] = df['Country or region'].apply(get_continent)
-except:
-    st.warning("Módulo `pycountry_convert` não instalado. Continente não atribuído.")
-    df["continent"] = "Unknown"
-
-# === Conteúdo de cada aba ===
-
-if selecionado == "Introdução":
-    st.title("Análise de Felicidade Mundial 2019")
+if choice == "Introdução":
+    st.title("🌍 O Analista Socioeconômico Global")
     st.markdown("""
-    Este painel interativo apresenta uma análise descritiva dos dados da felicidade global em 2019, considerando fatores como:
-    - Score de felicidade
-    - Continente
-    - Generosidade
-    - Liberdade de escolha
-    - Correlação entre variáveis
+    Este relatório explora os fatores socioeconômicos associados à **felicidade mundial** com base no _World Happiness Report 2019_.
+
+    Utilizando análise exploratória de dados, buscamos responder questões relacionadas à distribuição da felicidade, desigualdade entre países, fatores econômicos, sociais e culturais.
+
+    **Tema:** Economia e Desenvolvimento Social  
+    **Fonte:** [Kaggle - World Happiness Report 2019](https://www.kaggle.com/unsdsn/world-happiness)
     """)
 
-elif selecionado == "Estatísticas Descritivas":
-    st.subheader("Estatísticas Descritivas")
-    st.dataframe(df.describe())
+elif choice == "1. Distribuição do Score":
+    st.header("1️⃣ Distribuição do Score de Felicidade")
+    st.write(df['Score'].describe())
+    st.markdown("""
+    As medidas de tendência central e dispersão mostram que a maioria dos países possuem uma pontuação de felicidade entre 4.5 e 6.5.
+    """)
 
-elif selecionado == "Histograma e Tendências":
-    st.subheader("Score de Felicidade")
-    fig, ax = plt.subplots(figsize=(8, 4))
-    sns.histplot(df["Score"], bins=15, edgecolor="black")
-    plt.title("Distribuição do Score")
+elif choice == "2. Histogramas e Boxplots":
+    st.header("2️⃣ Histogramas e Boxplots do Score")
+    fig, axs = plt.subplots(1, 2, figsize=(14, 5))
+    sns.histplot(df['Score'], kde=True, ax=axs[0], color='skyblue')
+    axs[0].set_title("Histograma do Score")
+    sns.boxplot(y=df['Score'], ax=axs[1], color='lightgreen')
+    axs[1].set_title("Boxplot do Score")
     st.pyplot(fig)
 
-elif selecionado == "Correlação":
-    st.subheader("Matriz de Correlação")
-    cmap = LinearSegmentedColormap.from_list("custom", colors)
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(df.select_dtypes(include=np.number).corr(), cmap=cmap, annot=True)
+elif choice == "3. Assimetria e Curtose":
+    st.header("3️⃣ Assimetria e Curtose do Score")
+    skewness = skew(df['Score'])
+    kurt = kurtosis(df['Score'])
+    st.write(f"**Assimetria:** {skewness:.2f}")
+    st.write(f"**Curtose:** {kurt:.2f}")
+    st.markdown("""
+    - Assimetria próxima de 0 indica uma distribuição quase simétrica.
+    - Curtose próxima de 0 indica distribuição mesocúrtica (sem caudas pesadas).
+    """)
+
+elif choice == "4. Score Category":
+    st.header("4️⃣ Classificação por Categoria de Felicidade")
+    freq = df['Score Category'].value_counts()
+    st.write(freq)
+    st.bar_chart(freq)
+
+elif choice == "5. Score x Riqueza":
+    st.header("5️⃣ Felicidade x Riqueza do País")
+    crosstab = pd.crosstab(df['Riqueza'], df['Score Category'])
+    st.write(crosstab)
+    st.bar_chart(crosstab)
+
+elif choice == "6. GDP vs Vida Saudável":
+    st.header("6️⃣ Correlação entre PIB per capita e Expectativa de Vida Saudável")
+    corr = df[['GDP per capita', 'Healthy life expectancy']].corr().iloc[0, 1]
+    st.write(f"Correlação de Pearson: {corr:.2f}")
+    fig = px.scatter(df, x='GDP per capita', y='Healthy life expectancy',
+                     color='Score Category', title='GDP vs Vida Saudável')
+    st.plotly_chart(fig)
+
+elif choice == "7. Dispersão: GDP x Score":
+    st.header("7️⃣ Diagrama de Dispersão: GDP per capita x Score de Felicidade")
+    fig = px.scatter(df, x='GDP per capita', y='Score',
+                     color='Score Category', hover_name='Country or region')
+    st.plotly_chart(fig)
+
+elif choice == "8. Heatmap de Correlações":
+    st.header("8️⃣ Mapa de Calor das Correlações")
+    numeric_cols = df.select_dtypes(include=np.number)
+    corr_matrix = numeric_cols.corr()
+    fig, ax = plt.subplots(figsize=(12, 8))
+    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f", ax=ax)
     st.pyplot(fig)
 
-elif selecionado == "Generosidade por Continente":
-    st.subheader("Generosidade por Continente")
-    df_valid = df[df["continent"] != "Unknown"]
-    media_gen = df_valid.groupby("continent")["Generosity"].mean()
-    fig, ax = plt.subplots(figsize=(8, 4))
-    sns.barplot(x=media_gen.index, y=media_gen.values, palette=colors[:len(media_gen)])
-    plt.title("Média de Generosidade")
-    st.pyplot(fig)
+elif choice == "9. Generosidade por Continente":
+    st.header("9️⃣ Generosidade Média por Continente")
 
-    # Teste ANOVA
-    grupos = [g["Generosity"].values for _, g in df_valid.groupby("continent")]
-    f_stat, p_val = f_oneway(*grupos)
-    st.markdown(f"**Estatística F:** {f_stat:.2f}  \n**p-valor:** {p_val:.4f}")
-    if p_val < 0.05:
-        st.success("→ Diferença significativa entre continentes.")
+  
+    df.columns = [col.strip().title() for col in df.columns]
+
+   
+    df_valid = df[(df['Continent'] != 'Unknown') & (df['Generosity'].notna())]
+
+    
+    st.subheader("Quantidade de países por continente (dados válidos)")
+    continent_counts = df_valid.groupby('Continent').size()
+    st.dataframe(continent_counts)
+
+   
+    grouped = [group['Generosity'].values for name, group in df_valid.groupby('Continent') if len(group) > 1]
+
+    if len(grouped) < 2:
+        st.warning("Não há dados suficientes para realizar o teste ANOVA.")
     else:
-        st.info("→ Não há diferença significativa.")
+        try:
+            f_stat, p_value = f_oneway(*grouped)
+            st.markdown(f"**Estatística F:** {f_stat:.4f}")
+            st.markdown(f"**p-valor:** {p_value:.4f}")
+            if p_value < 0.05:
+                st.success("→ Há diferença estatisticamente significativa na generosidade entre os continentes.")
+            else:
+                st.info("→ Não há diferença estatisticamente significativa na generosidade entre os continentes.")
+        except Exception as e:
+            st.error(f"Erro ao executar ANOVA: {e}")
 
-elif selecionado == "Liberdade por Categoria":
-    st.subheader("Liberdade por Score")
-    st.dataframe(df.groupby("Score_Category")["Freedom to make life choices"].describe())
 
-elif selecionado == "Exportar Dados":
-    st.subheader("Exportar Dados")
-    csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("Baixar CSV", data=csv, file_name="felicidade_2019.csv", mime="text/csv")
+
+elif choice == "10. Liberdade x Categoria de Felicidade":
+    st.header("🔟 Liberdade para cada Categoria de Felicidade")
+    group_stats = df.groupby('Score Category')['Freedom to make life choices'].describe()
+    st.write(group_stats)
+    fig, ax = plt.subplots()
+    sns.boxplot(data=df, x='Score Category', y='Freedom to make life choices', palette='pastel')
+    ax.set_title("Liberdade x Categoria de Felicidade")
+    st.pyplot(fig)
