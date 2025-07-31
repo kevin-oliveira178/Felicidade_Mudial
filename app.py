@@ -175,20 +175,29 @@ elif choice == "9. Generosidade por Continente":
     df_valid = df[df['Generosity'].notnull() & df['continent'].notnull()]  # Corrigido para 'continent'
 
     if not df_valid.empty:
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.boxplot(
-            data=df_valid,
-            x='continent',
-            y='Generosity',
-            palette='Set2'
-        )
-        plt.title('Distribuição da Generosidade por Continente', color=accent_color)
-        plt.xlabel('Continente', color=text_color)
-        plt.ylabel('Generosidade', color=text_color)
-        plt.xticks(rotation=45, color=text_color)
-        plt.yticks(color=text_color)
-        plt.gcf().patch.set_facecolor(background_color)
-        st.pyplot(fig)  # Use st.pyplot para mostrar o gráfico no Streamlit
+         # Filtrando dados válidos
+       
+       df_valid = df[df['Generosity'].notnull() & df['Continent'].notnull()]
+
+       # Verificando a contagem de países por continente
+       st.write("Contagem de países por continente (dados filtrados):")
+       st.write(df_valid['Continent'].value_counts())
+
+       if not df_valid.empty:
+           fig, ax = plt.subplots(figsize=(10, 6))
+           sns.boxplot(
+               data=df_valid,
+               x='Continent',
+               y='Generosity',
+               palette='Set2'  # ou outra paleta que você preferir
+           )
+           plt.title('Distribuição da Generosidade por Continente', color=accent_color)
+           plt.xlabel('Continente', color=text_color)
+           plt.ylabel('Generosidade', color=text_color)
+           plt.xticks(rotation=45, color=text_color)
+           plt.yticks(color=text_color)
+           plt.gcf().patch.set_facecolor(background_color)
+           st.pyplot(fig)  #Use st.pyplot para mostrar o gráfico no Streamlit
     else:
         st.write("Não há dados suficientes para exibir o gráfico de generosidade por continente.")
 
