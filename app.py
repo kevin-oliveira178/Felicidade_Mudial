@@ -343,7 +343,7 @@ elif choice == "2. Histogramas e Boxplots":
     axs[0].set_title("Histograma do Score")
     
     fig2, axs = plt.subplots(1, 2, figsize=(14, 5))
-    sns.boxplot(y=df['Score'], ax=axs[1], color='#ff7f0e', horient = "h")  # Laranja
+    sns.boxplot(y=df['Score'], ax=axs[1], color='#ff7f0e', orient = "h")  # Laranja
     axs[1].set_title("Boxplot do Score")
     
     #exibição dos gráficos e comentario embaixo
