@@ -337,9 +337,12 @@ elif choice == "1. Distribuição do Score":
 elif choice == "2. Histogramas e Boxplots":
     st.header("2️⃣ Histogramas e Boxplots do Score")
      
-    fig2, axs = plt.subplots(1, 2, figsize=(14, 5))
-    sns.boxplot(x=df['Score'], ax=axs[1], color='#ff7f0e')  # Note que usei 'x' aqui
-    axs[1].set_title("Boxplot do Score")
+    
+    fig, ax = plt.subplots(figsize=(7, 5))
+    sns.boxplot(x=df['Score'], ax=ax, color='#ff7f0e')
+    ax.set_title("Boxplot do Score")
+    plt.tight_layout()
+    
     
     #exibição dos gráficos e comentario embaixo
     
