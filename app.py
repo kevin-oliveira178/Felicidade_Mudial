@@ -112,8 +112,18 @@ elif choice == "1. Distribuição do Score":
     st.header("1️⃣ Distribuição do Score de Felicidade")
     st.write(df['Score'].describe())
     st.markdown("""
-    As medidas de tendência central e dispersão mostram que a maioria dos países possuem uma pontuação de felicidade entre 4.5 e 6.5.
+    olhando para a tabela acima e tomando o valor do desvio padrão e da média vemos que no primeiro intervalo 
+    de media - menos desvio padrão a media + 1 vez o desvvio padrão vemos que os primeiro e terceiro quartis estão dentro dessa faixa. o que significa que 
+    ao menos 50% dos dados estão nesse intervalo. O o que deixa a hipótese de que essa distribuição obedece a regra empirica 
+    68, 95, 99,7. pode estar muito perto de um adistribuição normal.
     """)
+    st.write("""por outro lado se olhar os valores de média e mediana. tmeos Mediana menor que a média, com uma diferença bem mínima. podemos supor então que 
+            distribuição é fracamente assimetrica a direita. Mas calma, não conclua nada ainda """)
+    st.write("passe para a próxima e vamos explorar mais um puco sobre analisando os gráficos!! ")
+
+
+### terfeira seção: gráficos que mostram a a distribuição da variável score ##
+
 
 elif choice == "2. Histogramas e Boxplots":
     st.header("2️⃣ Histogramas e Boxplots do Score")
