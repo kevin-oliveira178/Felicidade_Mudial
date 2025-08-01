@@ -338,17 +338,17 @@ elif choice == "2. Histogramas e Boxplots":
     st.header("2️⃣ Histogramas e Boxplots do Score")
     
     #criação dos gráficos fig e histograma e boxplot fig2
-    #fig, axs = plt.subplots(1, 2, figsize=(14, 5))
-    #sns.histplot(df['Score'], kde=True, ax=axs[0], color='#1f77b4')  # Azul
-    #axs[0].set_title("Histograma do Score")
+    fig, axs = plt.subplots(1, 2, figsize=(14, 5))
+    sns.histplot(df['Score'], kde=True, ax=axs[0], color='#1f77b4')  # Azul
+    axs[0].set_title("Histograma do Score")
     
     fig2, axs = plt.subplots(1, 2, figsize=(14, 5))
     sns.boxplot(y=df['Score'], ax=axs[1], color='#ff7f0e', horient = "h")  # Laranja
     axs[1].set_title("Boxplot do Score")
     
     #exibição dos gráficos e comentario embaixo
-    #st.pyplot(fig)
-    #st.wirite("escrever comentário aqui")
+    st.pyplot(fig)
+    st.wirite("escrever comentário aqui")
     st.write("""Nesse momento vamos buscar evidenciar nossa tese sobre a assimetria da distribuição dos dados 
              para isso podemos calcular o coeficiente de assimetria para a variável score seguindo o método de Skewness""")
     #calculo feito com método de skewnes. a função existente no pandas
@@ -379,6 +379,7 @@ elif choice == "3. tabela de frequência do score":
     n = len(score)
     s = np.std(score, ddof=1)  # desvio padrão amostral (ddof=1)
     amplitude = score.max() - score.min()
+    
 
     # Calculando largura da classe utilizando método de scott, acredito que por ter acesso aos dados brutos
     # vou encontrar uma presentatividade melhor nele (bin width)
