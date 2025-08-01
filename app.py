@@ -173,34 +173,13 @@ elif choice == "8. Heatmap de Correlações":
 
 
 elif choice == "9. Generosidade por Continente":
-    df_valid = df[df['Generosity'].notnull() & df['continent'].notnull()]  # Corrigido para 'continent'
-
-    if not df_valid.empty:
-         # Filtrando dados válidos
-       
-       df_valid = df[df['Generosity'].notnull() & df['continent'].notnull()]
-
-       # Verificando a contagem de países por continente
-       st.write("Contagem de países por continente (dados filtrados):")
-       st.write(df_valid['continent'].value_counts())
-
-       if not df_valid.empty:
-           fig, ax = plt.subplots(figsize=(10, 6))
-           sns.boxplot(
-               data=df_valid,
-               x='continent',
-               y='Generosity',
-               palette='Set2'  # ou outra paleta que você preferir
-           )
-           plt.title('Distribuição da Generosidade por Continente', color=accent_color)
-           plt.xlabel('Continente', color=text_color)
-           plt.ylabel('Generosidade', color=text_color)
-           plt.xticks(rotation=45, color=text_color)
-           plt.yticks(color=text_color)
-           plt.gcf().patch.set_facecolor(background_color)
-           st.pyplot(fig)  #Use st.pyplot para mostrar o gráfico no Streamlit
-    else:
-        st.write("Não há dados suficientes para exibir o gráfico de generosidade por continente.")
+    st.header("9 generosidade por continente")
+    group_stats = df.groupby('continent')['Generosity'].describe()
+    st.write(group_stats)
+    fig, ax = plt.subplots()
+    sns.boxplot(data=df, x='continent', y='Generosity', palette='pastel')
+    ax.set_title("Continente x Generosidade")
+    st.pyplot(fig)
 
 elif choice == "10. Liberdade x Categoria de Felicidade":
     st.header("🔟 Liberdade para cada Categoria de Felicidade")
