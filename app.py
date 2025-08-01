@@ -80,6 +80,13 @@ pages = [
     "9. Generosidade por Continente",
     "10. Liberdade x Categoria de Felicidade"
 ]
+
+
+
+
+
+
+
 choice = st.sidebar.radio("Escolha uma seção:", pages)
 
 if choice == "Introdução":
@@ -91,7 +98,17 @@ if choice == "Introdução":
     **Fonte:** [Kaggle - World Happiness Report 2019](https://www.kaggle.com/unsdsn/world-happiness)
     """)
 
+## segunda seção: distribuição da variável score
+
+
 elif choice == "1. Distribuição do Score":
+    
+    st.write("O score de felicidade foi uma medida obtida em 2015 ao se perguntar as pessoas como elas classificariam sua felicidadede de 0 a 10"
+             )
+    st.write("E esse vai ser a nossa variável pricipal para avaliação")
+    st.write("dito isso o primeiro passo é vermos as estatisticas descritivas sobre essa variável. Seguem elas abaixo")
+    
+    
     st.header("1️⃣ Distribuição do Score de Felicidade")
     st.write(df['Score'].describe())
     st.markdown("""
