@@ -357,12 +357,12 @@ elif choice == "2. Histogramas e Boxplots":
     st.write("podemos então representar isso graficamente com um box-plot")
     
     st.pyplot(fig)
-    st.write("perceba que mesmo com o gráfico. A essa diferença na distribuição é pouco perceptivel. parece até que os daos estão perfeita e igualmente distribuidos. ")
-    st.write("o que faremos na sequência é melhor representar essa distribuição")
+    st.write("perceba que mesmo com o gráfico a diferença na distribuição é pouco perceptivel. parece até que os daos estão perfeita e igualmente distribuidos. ")
+    st.write("o que faremos na sequência é melhor representar essa distribuição de modo que posssamos enxergar de fato o que está acontecendo.")
+    st.write("vá para a próxima seção")
     
     
-    
-    #quarta parte: calculo da assimetria e curtose.
+    #quarta parte: agrupamento dos dados.
 
 
 elif choice == "3. tabela de frequência do score":
@@ -406,7 +406,7 @@ elif choice == "3. tabela de frequência do score":
     #construção do gráfico do histograma######
     labels = [str(interval) for interval in frq_tab_score.index]
     frequencias = frq_tab_score.values
-
+    
     # Criar gráfico tipo histograma (manual)
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -426,7 +426,7 @@ elif choice == "3. tabela de frequência do score":
     plt.tight_layout()
     
     ####apresentação
-    st.write(fig)
+    st.pyplot(fig)
     st.write("agora temos uma boa visualização da distribuição. podemos calcular para esses dados agrupados as medidasa descritivas")
     
     
