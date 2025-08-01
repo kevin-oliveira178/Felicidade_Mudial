@@ -356,7 +356,7 @@ elif choice == "2. Histogramas e Boxplots":
              mostra uma assimetria fraca e positiva""")
     st.write("podemos então representar isso graficamente com um box-plot")
     
-    st.pyplot(fig2)
+    st.pyplot(fig)
     st.write("perceba que mesmo com o gráfico. A essa diferença na distribuição é pouco perceptivel. parece até que os daos estão perfeita e igualmente distribuidos. ")
     st.write("o que faremos na sequência é melhor representar essa distribuição")
     
