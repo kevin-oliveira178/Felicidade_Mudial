@@ -273,7 +273,7 @@ pages = [
     "Introdução",
     "1. Distribuição do Score",
     "2. Histogramas e Boxplots",
-    "3. Assimetria e Curtose",
+    "3. tabela de frequência do score",
     "4. Score Category",
     "5. Score x Riqueza",
     "6. GDP vs Vida Saudável",
@@ -406,7 +406,7 @@ elif choice == "3. tabela de frequência do score":
     #construção do gráfico do histograma######
     labels = [str(interval) for interval in frq_tab_score.index]
     frequencias = frq_tab_score.values
-    
+
     # Criar gráfico tipo histograma (manual)
     fig, ax = plt.subplots(figsize=(10, 6))
 
