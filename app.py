@@ -311,6 +311,7 @@ elif choice == "2. Histogramas e Boxplots":
 elif choice == "3. Assimetria e Curtose":
     st.header("3️⃣ Assimetria e Curtose do Score")
     skewness = skew(df['Score'])
+<<<<<<< Updated upstream
     kurt = kurtosis(df['Score'])
     st.write(f"**Assimetria:** {skewness:.2f}")
     st.write(f"**Curtose:** {kurt:.2f}")
@@ -318,6 +319,87 @@ elif choice == "3. Assimetria e Curtose":
     - Assimetria próxima de 0 indica uma distribuição quase simétrica.
     - Curtose próxima de 0 indica distribuição mesocúrtica (sem caudas pesadas).
     """)
+=======
+    
+    st.write(f"**Assimetria:** {skewness:.4f}")
+    st.write(f"""como podemos ver o valor do coeficiente de assimetria nos confima nossa suposição. o valor de {skewness:.4f} 
+             mostra uma assimetria fraca e positiva""")
+    st.write("podemos então representar isso graficamente com um box-plot")
+    
+    st.pyplot(fig2)
+    st.write("perceba que mesmo com o gráfico. A essa diferença na distribuição é pouco perceptivel. parece até que os daos estão perfeita e igualmente distribuidos. ")
+    st.write("o que faremos na sequência é melhor representar essa distribuição")
+    
+    
+    
+    #quarta parte: calculo da assimetria e curtose.
+
+
+elif choice == "3. tabela de frequência do score":
+    st.header("3️⃣ Tabela de frequência do Score")
+    
+    st.write(""" como estamos tratando de dados quantitativos contínuos é muito conveniente agrupar esses dados 
+             , criando uma tabela de frequência de classes""")
+    
+    #criando a tabela de frequência
+        
+    n = len(score)
+    s = np.std(score, ddof=1)  # desvio padrão amostral (ddof=1)
+    amplitude = score.max() - score.min()
+    
+
+    # Calculando largura da classe utilizando método de scott, acredito que por ter acesso aos dados brutos
+    # vou encontrar uma presentatividade melhor nele (bin width)
+
+    h = (3.5 * s) / (n ** (1/3))
+
+    # Calculando número de classes (bins) e minimos
+    k = int(np.ceil(amplitude / h))
+    h = int(np.ceil(h))
+    min = int(np.floor(score.min()))
+    max = int(np.ceil(score.max()))
+
+    #definindo intervalos
+    bins = list(range(min, max+1,h))
+    labels = ['2 |-- 3','3 |-- 4','4 |-- 5','5 |-- 6','6 |-- 7', '7 |--|8']
+    frq_tab_score = pd.cut(score, bins=bins, right=False, labels=labels).value_counts().sort_index()
+    
+    st.write(f""" Utilizaremos o método de Scott por se aplicar bem a uma quantidade media de dados, para calcular o numero 
+             de classes k ({k}). Daí calculamos a amplitude h de cada classe ({h}). e
+             tomaremos como valor valor ínfimo o piso do menor valor da série; criamos as classes e 
+             distribuimos as ocorrencias.""")
+    st.write("contruindo a tabelo temos:")
+    st.write(frq_tab_score)
+    st.write("""olhando a tabela de frequencias podemos observar uma concentração dos dados nas classes de intervalos de 4-5 e 5 a 6""")
+    st.write("para uma melhor leitura vamos contruir um histograma a partir da tabela.")
+    
+    #construção do gráfico do histograma######
+    labels = [str(interval) for interval in frq_tab_score.index]
+    frequencias = frq_tab_score.values
+
+    # Criar gráfico tipo histograma (manual)
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    plt.bar(labels, frequencias, edgecolor='black')
+    bars = plt.bar(
+        labels, 
+        frequencias, 
+        color='#1f77b4', 
+        width=1.0,
+        edgecolor='black'
+        # Ajuste a largura aqui (padrão é 0.8)
+    )
+    plt.xlabel('Intervalos de Score')
+    plt.ylabel('Frequência')
+    plt.title('Histograma por Classes (Score)')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    
+    ####apresentação
+    st.write(fig)
+    st.write("agora temos uma boa visualização da distribuição. podemos calcular para esses dados agrupados as medidasa descritivas")
+    
+>>>>>>> Stashed changes
 
 elif choice == "4. Score Category":
     st.header("4️⃣ Classificação por Categoria de Felicidade")
@@ -327,12 +409,23 @@ elif choice == "4. Score Category":
 
 elif choice == "5. Score x Riqueza":
     st.header("5️⃣ Felicidade x Riqueza do País")
+    st.markdown("""
+                > O gráfico de barras empilhadas nos mostra visualmente o padrão descrito na tabela, na barra dos países pobres maior predominância da cor azul que representa baixa felicidade, já a barra dos países ricos é predominantemente azul claro, mostrando alta felicidade. A categoria média de felicidade se mostra mais equilibrada em ambos os grupos e menos expressiva em termos de quantidade. 
+    """)
     crosstab = pd.crosstab(df['Riqueza'], df['Score Category'])
     st.write(crosstab)
     st.bar_chart(crosstab)
-
+    st.markdown("""
+                ## Conclusão:
+                > Países ricos tendem a ser mais felizes, enquanto países pobres tendem a ser menos felizes. Isso indica que a correlação entre riqueza e felicidade é positiva, apesar de não ser uma relação determinística, a tendência é muito evidente.
+    """)
+    
 elif choice == "6. GDP vs Vida Saudável":
     st.header("6️⃣ Correlação entre PIB per capita e Expectativa de Vida Saudável")
+    st.markdown("""
+                > O gráfico apresenta uma correlação forte positiva entre o GDP e Healthy life expectancy, por isso à medida que o GDP aumenta, também aumenta a expectativa de vida saudável. A distribuição dos pontos na tabela sugere uma tendência crescente, mostrando que países com maior renda proporcionam condições de vida melhores e mais saudáveis.
+                > O coeficiente de correlação (corr = 0.84) mostra que há uma relação densa e considerável, pois quanto maior a renda média por pessoa de um país, maior a expectativa de vida com saúde de seus habitantes. De forma geral, o gráfico nos mostra uma ideia clara de que a riqueza contribui para o bem estar da população, provavelmente por meio do melhor acesso à saúde, educação, segurança, infraestrutura e lazer.
+    """)
     corr = df[['GDP per capita', 'Healthy life expectancy']].corr().iloc[0, 1]
     st.write(f"Correlação de Pearson: {corr:.2f}")
     fig = px.scatter(df, x='GDP per capita', y='Healthy life expectancy',
@@ -341,13 +434,66 @@ elif choice == "6. GDP vs Vida Saudável":
 
 elif choice == "7. Dispersão: GDP x Score":
     st.header("7️⃣ Diagrama de Dispersão: GDP per capita x Score de Felicidade")
+    st.markdown("""
+                > O gráfico nos mostra uma tendência ascendente clara entre o GDP e o Score de Felicidade, pois conforme o GDP aumenta, o score de felicidade também tende a aumentar. Os pontos azuis (felicidade alta) se concentram no canto superior direito, o que indica que os países ricos, em sua maioria, têm maiores índices de felicidade. Os pontos rosa (baixa felicidade) se concentram no canto inferior esquerdo, representando países com desenvolvimento e felicidade média/baixa. Os dados apresentam uma relação positiva entre renda e felicidade. 
+    """)
     fig = px.scatter(df, x='GDP per capita', y='Score',
                      color='Score Category', hover_name='Country or region')
     st.plotly_chart(fig)
 
 elif choice == "8. Heatmap de Correlações":
     st.header("8️⃣ Mapa de Calor das Correlações")
+    st.markdown("""
+                ## 1. Índice de Felicidade: Como as Dimensões Socioeconômicas Importam:
+                O índice de felicidade correlaciona-se positiva e fortemente com três variáveis principais, sendo elas:
+                - **GDP per capita**: r = 0.79  
+                > Isso significa que a riqueza média nacional está entre os fatores mais associados à felicidade. Quanto mais desenvolvida a economia de um país, melhor é a condição de vida dos habitantes.
+                - **Social support (Apoio social)**: r = 0.78  
+                > A presença de apoio social (amigos e familiares), tem contribuição igual ao fator econômico no nível de bem estar das pessoas.
+                - **Expectativa de vida saudável**: r = 0.78  
+                > A capacidade de viver uma vida longa e saudável está fortemente relacionada a percepção de felicidade.
+                Isso significa que os fatores estruturais e básicos de bem estar são os principais determinantes do índice de felicidade.
+                
+                ## 2. O Overall Rank é um reflexo inverso do Score:
+                >Como o papel do overall rank é ser inverso a todas as outras variáveis, todas estão correlacionadas negativamente com ele. As mais fortes são:
+                 - **Score** r = -0.99
+                >Como a correlação negativa é praticamente perfeita, isso valida a coluna score como base para a criação do ranking
+                - **GDP per capita** (r = -0.80) e **Healthy life expectancy** (r = -0.79):
+                >Mostra que países ricos e saudáveis ​​tendem a ocupar altas posições no ranking.
+                
+                ## 3. Liberdade e corrupção possui um papel moderado na felicidade:
 
+                - **Liberdade para fazer escolhas de vida**: r = 0.57  
+                > Isto é, ter liberdade para fazer escolhas importantes na vida contribui significativamente para o bem-estar percebido
+
+                - **Percepções de corrupção**: r = 0.39  
+                > Embora tenha uma correlação positiva, seu efeito é mais limitado. Isso significa que a corrupção percebida não afetou diretamente a felicidade da população em nível próximo.
+
+                ## 4. Generosity: A Shockingly Weak Factor
+
+                - **A generosidade**: r = 0.08  
+                > Tem correlação de quase zero com o Score geral. Esta variável parece apontar o fato de que, embora seja crítico ao nível individual, o nível de generosidade de um país não afeta de forma significativa a felicidade dos habitantes.
+
+                ## 5. Relações entre as variáveis explicativas:
+
+                - **GDP per capita vs. Healthy life expectancy**: r = 0.84  
+                > Países mais ricos têm maior qualidade de vida e longevidade.
+
+                - **Social support vs. Freedom to make life choices**: r = 0.45  
+                > As redes de apoio social fortalecem a autonomia.
+
+                - **Perceptions of corruption vs. Freedom to make life choices**: r = 0.44  
+                > A corrupção reduz a sensação de liberdade.
+
+                ## Conclusão:
+
+                > A matriz de correlação mostra que fatores estruturais básicos para a vida do ser humano têm maior correlação com a felicidade percebida no país.  
+                > Características mais subjetivas (como generosidade e percepção de corrupção), embora tenham influência, possuem menor relevância na análise.
+           
+
+
+        """)
+    
     colors = ["#fd9091", "#feb369", "#76e1e9", "#62d8ba", "#b497e5"]
     custom_cmap = LinearSegmentedColormap.from_list("custom_cmap", colors)
     numeric_cols = df.select_dtypes(include=np.number)
@@ -375,7 +521,31 @@ elif choice == "8. Heatmap de Correlações":
 elif choice == "9. Generosidade por Continente":
     st.subheader("📦 Distribuição da Generosidade por Continente")
     df_valid = df[df['continent'] != 'Unknown']
+    st.markdown("""
+                 ## Principais análises por continente:
+                 - **Europe**:
+                 > É perceptível uma grande dispersão dos dados por causa dos bigodes mais extensos e da caixa mais larga, tem uma mediana próxima de 0.15 mostrando uma generosidade moderada.
+              
+                 - **Oceania**:
+                 > Possui apenas um valor visível (0.33), provavelmente mostrando que seus dois países (Nova Zelândia e Austrália) têm níveis de felicidade iguais ou muito próximos, além de ser um valor alto e sem dispersão, indica uma uniformidade nos dados, apesar de ser uma amostra pequena. 
+              
+                 - **North America**:
+                 > A generosidade é moderada, também com a mediana em 0.15, mas possui outliers altos (acima de 0.4) indicando que alguns países são muito mais generosos que a média da região.
+              
+                 - **Asia**:
+                 > A generosidade possui sua mediana pouco acima de 0.2, com uma grande variabilidade e maior presença de outliers, indicando que, apesar da região ter uma generosidade moderada, possui países muito generosos e isso gera uma grande diversidade no continente.
+              
+                 - **South America**:
+                 > Possui a mediana mais baixa, comparado com os outros continentes, de aproximadamente 0.12 e com pouca variação, indicando que os países possuem os níveis de generosidade muito próximos, porém baixos. 
+              
+                 - **Africa**:
+                 > Possui a mediana semelhante a Ásia, mais próxima de 0.18, tendo uma distribuição mais concentrada com uma leve presença de outliers altos, mostrando uma generosidade moderada com menor taxa de dispersão. 
 
+                 ## Conclusão:
+                 > Apesar da Oceania ter a maior taxa de generosidade, não pode ser tomada como uma informação relevante por possuir uma amostra muito limitada. A América do Sul possui a taxa de generosidade mais baixa e com a menor dispersão de dados. A América do Norte, Ásia e Europa têm as maiores variações internas, indicando maior taxa de desigualdade entre países da mesma região. 
+
+
+     """)
     if not df_valid.empty:
         fig, ax = plt.subplots(figsize=(10, 6))
         sns.boxplot(data=df_valid, x='continent', y='Generosity', palette='Set2')
@@ -390,8 +560,25 @@ elif choice == "9. Generosidade por Continente":
 
 elif choice == "10. Liberdade x Categoria de Felicidade":
     st.header("🔟 Liberdade para cada Categoria de Felicidade")
+    st.markdown("""
+                - **Alta felicidade**:
+                > É a categoria que possui a maior média (0.487), isso indica que pessoas que vivem em países mais felizes sentem que têm maior liberdade para tomar decisões de vida. Possui uma distribuição, com desvio padrão de 0.092, mais concentrada, o que apresenta maior consistência interna. Sua mediana (0.495) é bem próxima da média, sugerindo uma certa simetria. O intervalo interquartil é de 0.121, representando uma dispersão moderada.
+                
+                - **Média felicidade**:
+                > A média da categoria é 0.375, o que nos mostra uma liberdade moderada. Tem uma dispersão de dados maior que da categoria anterior, mas menor que da categoria posterior. A mediana (de 0.389) também é próxima da média, que apresenta-nos uma distribuição também simétrica. O intervalo interquartil é de 0.187, mais alto que o da categoria anterior, sugere que há maior diversidade entre os países. 
+                
+                - **Baixa felicidade**:
+                > É a categoria que apresenta a menor média (0.314) e a menor mediana (0.322), indicando que as pessoas nesses países sentem que têm menor liberdade para fazer escolhas de vida. Além disso, é a categoria que tem a maior dispersão (desvio padrão de 0.153), ou seja, existem muitos países em situações críticas, possui alguns países com níveis aceitáveis (máximo da categoria 0.609, maior que a média dos outros), mas também tem países onde a percepção de liberdade é praticamente nula (mínimo da categoria 0.000). Essa categoria é a que apresenta a distribuição mais assimétrica e mais desigual.
+
+    """)
     group_stats = df.groupby('Score Category')['Freedom to make life choices'].describe()
     st.write(group_stats)
+    
+    st.markdown("""
+                ## Conclusão:
+                > Percebe-se que a percepção de liberdade está fortemente associada à felicidade. Países mais felizes têm níveis médios de liberdade mais altos e distribuições mais simétricas. Já os países menos felizes têm níveis médios de liberdade menor e maior assimetria nas distribuições. O que faz-se entender que liberdade e igualdade são fatores indispensáveis para o bem estar de uma sociedade e de seu desenvolvimento social.
+
+    """)
     fig, ax = plt.subplots()
     sns.boxplot(data=df, x='Score Category', y='Freedom to make life choices', palette='pastel')
     ax.set_title("Liberdade x Categoria de Felicidade")
@@ -399,7 +586,11 @@ elif choice == "10. Liberdade x Categoria de Felicidade":
 
 elif choice == "11. Mapa Múndi de Felicidade":
     st.header("🌍 Mapa Múndi de Felicidade")
-    
+    st.markdown("""
+                > Este mapa utiliza a escala de cores pra representar o nível de felicidade em cada país. Os tons de amarelo indicam países com maior felicidade, enquanto os tons de roxo mostram onde a menor nível de felicidade.
+              * O mapa é interativo, ao passar o mouse sobre um país, exibe um pequeno texto com seus dados específicos.**
+
+    """)
     # Criar um DataFrame para o mapa
     map_df = df[['Country or region', 'Score', 'GDP per capita', 'Healthy life expectancy', 'Generosity', 'Freedom to make life choices']]
     
