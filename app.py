@@ -173,13 +173,40 @@ elif choice == "8. Heatmap de Correlações":
 
 
 elif choice == "9. Generosidade por Continente":
-    st.header("9 generosidade por continente")
-    group_stats = df.groupby('continent')['Generosity'].describe()
+    st.header("9. Generosidade por Continente")
+
+    # Verificação preliminar
+    st.write("Colunas disponíveis:", df.columns.tolist())
+    st.write("Dados nulos:", df[['continent', 'Generosity']].isnull().sum())
+
+    # Filtragem de dados
+    df_filtered = df.dropna(subset=['continent', 'Generosity'])
+
+    # Estatísticas descritivas
+    group_stats = df_filtered.groupby('continent')['Generosity'].describe()
     st.write(group_stats)
-    fig, ax = plt.subplots()
-    sns.boxplot(data=df, x='continent', y='Generosity', palette='pastel')
-    ax.set_title("Continente x Generosidade")
-    st.pyplot(fig)
+
+    # Plotagem do boxplot
+    if not df_filtered.empty:
+        plt.figure(figsize=(10, 6))
+        sns.boxplot(
+            data=df_filtered,
+            x='continent',
+            y='Generosity',
+            palette='pastel',
+            width=0.6
+        )
+        
+        # Formatação do gráfico
+        plt.title("Distribuição de Generosidade por Continente", pad=20)
+        plt.xlabel("Continente")
+        plt.ylabel("Nível de Generosidade")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        
+        st.pyplot(plt.gcf())
+    else:
+        st.warning("Não há dados válidos para plotar o gráfico.")
 
 elif choice == "10. Liberdade x Categoria de Felicidade":
     st.header("🔟 Liberdade para cada Categoria de Felicidade")
