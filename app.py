@@ -404,7 +404,34 @@ elif choice == "3. tabela de frequência do score":
     st.write(frq_tab_score)
     st.write("""olhando a tabela de frequencias podemos observar uma concentração dos dados nas classes de intervalos de 4-5 e 5 a 6""")
     st.write("para uma melhor leitura vamos contruir um histograma a partir da tabela.")
-   
+    
+    #construção do gráfico do histograma######
+    labels = [str(interval) for interval in frq_tab_score.index]
+    frequencias = frq_tab_score.values
+
+    # Criar gráfico tipo histograma (manual)
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    plt.bar(labels, frequencias, edgecolor='black')
+    bars = plt.bar(
+        labels, 
+        frequencias, 
+        color='#1f77b4', 
+        width=1.0,
+        edgecolor='black'
+        # Ajuste a largura aqui (padrão é 0.8)
+    )
+    plt.xlabel('Intervalos de Score')
+    plt.ylabel('Frequência')
+    plt.title('Histograma por Classes (Score)')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    
+    ####apresentação
+    st.write(fig)
+    st.write("agora temos uma boa visualização da distribuição. podemos calcular para esses dados agrupados as medidasa descritivas")
+    
+    
     ##kurt = kurtosis(df['Score'])
     #st.write(f"**Curtose:** {kurt:.2f}")
     #st.markdown("""
