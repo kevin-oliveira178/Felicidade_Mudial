@@ -212,6 +212,9 @@ country_to_continent = {
     'ZW': 'Africa'
 }
 
+
+
+
 def add_continent_column(df, country_col):
     def get_continent(country):
         try:
@@ -284,7 +287,12 @@ pages = [
 
 
 
+###definição de  variáveis globais do app
+score = df["Score"]
 
+
+
+#bloco de introdução do app 
 
 
 choice = st.sidebar.radio("Escolha uma seção:", pages)
@@ -320,31 +328,89 @@ elif choice == "1. Distribuição do Score":
     """)
     st.write("""por outro lado se olhar os valores de média e mediana. tmeos Mediana menor que a média, com uma diferença bem mínima. podemos supor então que 
             distribuição é fracamente assimetrica a direita. Mas calma, não conclua nada ainda """)
-    st.write("passe para a próxima e vamos explorar mais um puco sobre analisando os gráficos!! ")
+    st.write("passe para a próxima e vamos explorar mais um puco sobre, analisando os gráficos!! ")
 
 
-### terfeira seção: gráficos que mostram a a distribuição da variável score ##
+### terçeira seção: gráficos que mostram a a distribuição da variável score ##
 
 
 elif choice == "2. Histogramas e Boxplots":
     st.header("2️⃣ Histogramas e Boxplots do Score")
-    fig, axs = plt.subplots(1, 2, figsize=(14, 5))
-    sns.histplot(df['Score'], kde=True, ax=axs[0], color='#1f77b4')  # Azul
-    axs[0].set_title("Histograma do Score")
-    sns.boxplot(y=df['Score'], ax=axs[1], color='#ff7f0e')  # Laranja
+    
+    #criação dos gráficos fig e histograma e boxplot fig2
+    #fig, axs = plt.subplots(1, 2, figsize=(14, 5))
+    #sns.histplot(df['Score'], kde=True, ax=axs[0], color='#1f77b4')  # Azul
+    #axs[0].set_title("Histograma do Score")
+    
+    fig2, axs = plt.subplots(1, 2, figsize=(14, 5))
+    sns.boxplot(y=df['Score'], ax=axs[1], color='#ff7f0e', horient = "h")  # Laranja
     axs[1].set_title("Boxplot do Score")
-    st.pyplot(fig)
-
-elif choice == "3. Assimetria e Curtose":
-    st.header("3️⃣ Assimetria e Curtose do Score")
+    
+    #exibição dos gráficos e comentario embaixo
+    #st.pyplot(fig)
+    #st.wirite("escrever comentário aqui")
+    st.write("""Nesse momento vamos buscar evidenciar nossa tese sobre a assimetria da distribuição dos dados 
+             para isso podemos calcular o coeficiente de assimetria para a variável score seguindo o método de Skewness""")
+    #calculo feito com método de skewnes. a função existente no pandas
     skewness = skew(df['Score'])
-    kurt = kurtosis(df['Score'])
-    st.write(f"**Assimetria:** {skewness:.2f}")
-    st.write(f"**Curtose:** {kurt:.2f}")
-    st.markdown("""
-    - Assimetria próxima de 0 indica uma distribuição quase simétrica.
-    - Curtose próxima de 0 indica distribuição mesocúrtica (sem caudas pesadas).
-    """)
+    
+    st.write(f"**Assimetria:** {skewness:.4f}")
+    st.write(f"""como podemos ver o valor do coeficiente de assimetria nos confima nossa suposição. o valor de {skewness:.4f} 
+             mostra uma assimetria fraca e positiva""")
+    st.write("podemos então representar isso graficamente com um box-plot")
+    
+    st.pyplot(fig2)
+    st.write("perceba que mesmo com o gráfico. A essa diferença na distribuição é pouco perceptivel. parece até que os daos estão perfeita e igualmente distribuidos. ")
+    st.write("o que faremos na sequência é melhor representar essa distribuição")
+    
+    
+    
+    #quarta parte: calculo da assimetria e curtose.
+
+
+elif choice == "3. tabela de frequência do score":
+    st.header("3️⃣ Tabela de frequência do Score")
+    
+    st.write(""" como estamos tratando de dados quantitativos contínuos é muito conveniente agrupar esses dados 
+             , criando uma tabela de frequência de classes""")
+    
+    #criando a tabela de frequência
+        
+    n = len(score)
+    s = np.std(score, ddof=1)  # desvio padrão amostral (ddof=1)
+    amplitude = score.max() - score.min()
+
+    # Calculando largura da classe utilizando método de scott, acredito que por ter acesso aos dados brutos
+    # vou encontrar uma presentatividade melhor nele (bin width)
+
+    h = (3.5 * s) / (n ** (1/3))
+
+    # Calculando número de classes (bins) e minimos
+    k = int(np.ceil(amplitude / h))
+    h = int(np.ceil(h))
+    min = int(np.floor(score.min()))
+    max = int(np.ceil(score.max()))
+
+    #definindo intervalos
+    bins = list(range(min, max+1,h))
+    labels = ['2 |-- 3','3 |-- 4','4 |-- 5','5 |-- 6','6 |-- 7', '7 |--|8']
+    frq_tab_score = pd.cut(score, bins=bins, right=False, labels=labels).value_counts().sort_index()
+    
+    st.write(f""" Utilizaremos o método de Scott por se aplicar bem a uma quantidade media de dados, para calcular o numero 
+             de classes k ({k}). Daí calculamos a amplitude h de cada classe ({h}). e
+             tomaremos como valor valor ínfimo o piso do menor valor da série; criamos as classes e 
+             distribuimos as ocorrencias.""")
+    st.write("contruindo a tabelo temos:")
+    st.write(frq_tab_score)
+    st.write("""olhando a tabela de frequencias podemos observar uma concentração dos dados nas classes de intervalos de 4-5 e 5 a 6""")
+    st.write("para uma melhor leitura vamos contruir um histograma a partir da tabela.")
+   
+    ##kurt = kurtosis(df['Score'])
+    #st.write(f"**Curtose:** {kurt:.2f}")
+    #st.markdown("""
+    #- Assimetria próxima de 0 indica uma distribuição quase simétrica.
+    #- Curtose próxima de 0 indica distribuição mesocúrtica (sem caudas pesadas).
+    #""")
 
 elif choice == "4. Score Category":
     st.header("4️⃣ Classificação por Categoria de Felicidade")
