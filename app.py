@@ -212,6 +212,28 @@ country_to_continent = {
     'ZW': 'Africa'
 }
 
+###### funções internas ####
+
+def calcular_quartil(df, k):
+    N = df['Frequência'].sum()
+    pos = k * N / 4  # posição do quartil (k=1 → Q1, k=2 → Q2...)
+    
+    for i, freq_acum in enumerate(df['Frequência Acumulada']):
+        if freq_acum >= pos:
+            break
+    
+    classe = df.iloc[i]
+    L = classe['Classe'].left
+    F_antes = 0 if i == 0 else df.iloc[i - 1]['Frequência Acumulada']
+    f = classe['Frequência']
+    h = classe['Classe'].right - classe['Classe'].left
+    
+    Q = L + ((pos - F_antes) / f) * h
+    return Q
+
+
+
+
 
 
 
@@ -422,26 +444,112 @@ elif choice == "3. tabela de frequência do score":
     plt.xlabel('Intervalos de Score')
     plt.ylabel('Frequência')
     plt.title('Histograma por Classes (Score)')
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=360)
     plt.tight_layout()
     
     ####apresentação
     st.pyplot(fig)
-    st.write("agora temos uma boa visualização da distribuição. podemos calcular para esses dados agrupados as medidasa descritivas")
+    st.write("agora temos uma melhor visualização da distribuição. podemos calcular para esses dados agrupados as medidasa descritivas")
+    st.write("podemos perceber nesse ponto que há um concentração de observações no vlores de 4 a 6 e que a maior prte dos dados estão concentrados mais a direita ")
+    st.write("a partir dos dados agrupados podemos também refazer os calculos das medidas descritivas e reconstruir o box-plot feito anteriormente ")
+    
+       ### #média ####
+    # 1. Calcular os pontos médios dos intervalos
+    classes = list(range(2,9,1))
+    midpoints = [(i+i+1)/2 for i in classes]
+
+    # 2. Frequências
+    frequencias = frq_tab_score.values
+
+    # 3. Produto frequência * ponto médio
+    produto_fx = [f * x for f, x in zip(frequencias, midpoints)]
+
+    # 4. Média
+    AGmedia = sum(produto_fx) / sum(frequencias)
+
+    ###########quartis 
+    #formatar um data frame com as medidas necessárias 
+    classes = pd.IntervalIndex.from_tuples([(2, 3), (3, 4), (4, 5), (5, 6),(6,7),(7,8)])
+    frequencias = frq_tab_score.values
+    df2 = pd.DataFrame({'Classe': classes, 'Frequência': frequencias})
+    df2['Frequência Acumulada'] = df2['Frequência'].cumsum() 
+
+    qa1 = calcular_quartil(df2, 1)  #qa1 são as medidas de posição feitas a partir dos dados agrupados 
+    qa2 = calcular_quartil(df2, 2)  # Mediana
+    qa3 = calcular_quartil(df2, 3)
+
+    minimo = df2['Classe'].apply(lambda x: x.left).min()
+    maximo = df2['Classe'].apply(lambda x: x.right).max()
+    st.write(f"média : \n {AGmedia:.4f}\nQ1:\n{qa1:.4f}\nQ2 (Mediana):\n{qa2:.4f}\nQ3:\n{qa3:.4f}")
+    st.write("""note que o valor de média permanece e mediana mantém sua leve diferença em comparação com os dados
+             não agrupados\n média: {AGmedia:.4f} > Mediana: {qa2:.4f}""")
+    st.write("tendo em mãos essses valores, podemos recriar o boxplot")
+    #a mediana se mantém minimamente menor que a média. logo não perdemos essa informação dos dados iniciais
+
+    boxplot_data = {
+        'med': qa2,
+        'q1': qa1,
+        'q3': qa3,
+        'whislo': minimo,
+        'whishi': maximo,
+        'fliers': []  # sem outliers, pois não temos dados individuais
+    }
+
+    bxp, ax = plt.subplots(figsize=(6, 5))
+    ax.axvline(qa2, color='green', linestyle='--', label=f'Mediana = {qa1}')
+    ax.bxp([boxplot_data], showfliers=False, vert=False)  # aqui está a mudança
+    ax.set_title('Boxplot para dados agrupados')
+    ax.set_xlabel('Valores')  # trocar ylabel por xlabel, já que o gráfico fica horizontal
+    ax.grid(True)
     
     
-    ##kurt = kurtosis(df['Score'])
-    #st.write(f"**Curtose:** {kurt:.2f}")
-    #st.markdown("""
-    #- Assimetria próxima de 0 indica uma distribuição quase simétrica.
-    #- Curtose próxima de 0 indica distribuição mesocúrtica (sem caudas pesadas).
-    #""")
+    st.write("veja abaixo como fica o box-plot para esse agrupamento")
+    st.pyplot(bxp)
+    st.write("""perceba o 'bigode' da esquerda com um comprimento maior em relação a direita. demonstra que os dados estão mais afastados dos valores mais baixos 
+             logo concentrados nos valores mais a direita""")
+
+    st.write("na próxima seção vejamos as variações da variável")
+
+
 
 elif choice == "4. Score Category":
-    st.header("4️⃣ Classificação por Categoria de Felicidade")
-    freq = df['Score Category'].value_counts()
-    st.write(freq)
-    st.bar_chart(freq)
+    
+    
+    
+    
+    #criação da tabela de frequência agrupada para a variável score
+    score.info()
+    score = score
+    n = len(score)
+    s = np.std(score, ddof=1)  # desvio padrão amostral (ddof=1)
+    amplitude = score.max() - score.min()
+
+    # Calculando largura da classe utilizando método de scott, acredito que por ter acesso aos dados brutos
+    # vou encontrar uma presentatovodade melhor nele (bin width)
+
+    h = (3.5 * s) / (n ** (1/3))
+
+    # Calculando número de classes (bins) e minimos
+    k = int(np.ceil(amplitude / h))
+    h = int(np.ceil(h))
+    min = int(np.floor(score.min()))
+    max = int(np.ceil(score.max()))
+
+    #definindo intervalos
+
+    bins = list(range(min, max+1,h))
+    
+    
+    fig2, ax = plt.subplots(figsize=(8, 5))
+    # Histograma com densidade
+    sns.histplot(score, bins=bins, kde=True, stat="density", edgecolor="black", color="lightblue")
+
+    # Personalização
+    plt.title("Histograma com Curva de Frequência (KDE)")
+    plt.xlabel("Score")
+    plt.ylabel("Densidade")
+    plt.grid(True)
+    plt.tight_layout()
 
 elif choice == "5. Score x Riqueza":
     st.header("5️⃣ Felicidade x Riqueza do País")
