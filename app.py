@@ -294,7 +294,7 @@ st.sidebar.title("🔎 Navegação")
 pages = [
     "Introdução",
     "1. Distribuição do Score",
-    "2. Histogramas e Boxplots",
+    "2. Boxplot",
     "3. tabela de frequência do score",
     "4. Assimetria",
     "5. Score x Riqueza",
