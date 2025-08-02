@@ -296,7 +296,7 @@ pages = [
     "1. Distribuição do Score",
     "2. Histogramas e Boxplots",
     "3. tabela de frequência do score",
-    "4. Score Category",
+    "4. Assimetria",
     "5. Score x Riqueza",
     "6. GDP vs Vida Saudável",
     "7. Dispersão: GDP x Score",
@@ -311,6 +311,28 @@ pages = [
 
 ###definição de  variáveis globais do app
 score = df["Score"]
+#criação da tabela de frequência agrupada para a variável score
+score.info()
+score = score
+n = len(score)
+s = np.std(score, ddof=1)  # desvio padrão amostral (ddof=1)
+amplitude = score.max() - score.min()
+
+# Calculando largura da classe utilizando método de scott, acredito que por ter acesso aos dados brutos
+# vou encontrar uma presentatovodade melhor nele (bin width)
+
+h = (3.5 * s) / (n ** (1/3))
+
+# Calculando número de classes (bins) e minimos
+k = int(np.ceil(amplitude / h))
+h = int(np.ceil(h))
+min = int(np.floor(score.min()))
+max = int(np.ceil(score.max()))
+
+#definindo intervalos
+bins = list(range(min, max+1,h))
+labels = ['2 |-- 3','3 |-- 4','4 |-- 5','5 |-- 6','6 |-- 7', '7 |--|8']
+frq_tab_score = pd.cut(score, bins=bins, right=False, labels=labels).value_counts().sort_index()
 
 
 
@@ -512,9 +534,54 @@ elif choice == "3. tabela de frequência do score":
 
 
 
-elif choice == "4. Score Category":
+elif choice == "4. Assimetria":
     
+    st.write("agora que temos os dados organizados de uma maneira agradavel, vamos ver como ocorre a variação desses deles")
+    st.write("tomar mão de medidas como:")
     
+    #calculo das medidas de variação 
+    #a diferença ainda é minima entre média ou seja fracamente assimétrica. mas nessa forma de apresentação já podemos ver que os dados estão concentrados mais a direita 
+
+    classes = [(2, 3), (3, 4), (4, 5), (5, 6),(6,7),(7,8)]
+    frequencias = frq_tab_score.values
+    pontos_medios = [(a + b) / 2 for a, b in classes]
+
+    # Total de elementos
+    n = sum(frequencias)
+
+    # Média
+    media = sum(f * x for f, x in zip(frequencias, pontos_medios)) / n
+
+    # Desvios centralizados
+    desvios = [x - media for x in pontos_medios]
+
+    # Variância
+    variancia = sum(f * (d ** 2) for f, d in zip(frequencias, desvios)) / n
+
+    # Desvio padrão
+    desvio_padrao = np.sqrt(variancia)
+
+    # Coeficiente de assimetria de fisher para dados agrupados 
+    assimetria = sum(f * (d ** 3) for f, d in zip(frequencias, desvios)) / (n * desvio_padrao ** 3)
+
+    # Curtose
+    curtose = sum(f * (d ** 4) for f, d in zip(frequencias, desvios)) / (n * desvio_padrao ** 4)
+
+    # Curtose-excesso (opcional)
+    curtose_excesso = curtose - 3
+
+    tabela = pd.DataFrame({
+    'Medida': ['Média', 'variância', 'desvio padrão', 'coef assimetria','coeficiente de curtose'],
+    'Valor': [media,variancia, desvio_padrao, assimetria,curtose_excesso]
+    })
+    st.write(tabela)
+    st.write("""A média dos dados é 5,45, e a variância é 1,36, com desvio padrão de 1,16 — indicando uma dispersão
+             moderada em torno da média. O coeficiente de assimetria é praticamente zero (0,0267), o que mostra
+             que a distribuição é fracamente assimétrica. Já a curtose é -0,72), o que indica uma distribuição
+             platicúrtica, ou seja, mais achatada que a normal.
+             """)
+    
+    st.write("É possivel visuializar ainda melhor isso no grafico de de curva de densidade")
     
     
     #criação da tabela de frequência agrupada para a variável score
@@ -550,6 +617,15 @@ elif choice == "4. Score Category":
     plt.ylabel("Densidade")
     plt.grid(True)
     plt.tight_layout()
+
+    st.write("""onde podemos ver o achatamento sendo criado pela concentração dos dados nas duas classes centrais""")
+    st.write('''note que apesar do coeficiente de assimetria nos mostrar uma assimetria positiva temos a impressão 
+             que é o oposto. uma solução para esta distorção seria eliminar a primeira classe, pois há apenas 1 pais nela,
+             que cria essa impressão. Mas como nosso intuito é observar todos os paises, vamos deixar essa coluna ai.''')
+
+
+#parte da sara e nayla 
+
 
 elif choice == "5. Score x Riqueza":
     st.header("5️⃣ Felicidade x Riqueza do País")
