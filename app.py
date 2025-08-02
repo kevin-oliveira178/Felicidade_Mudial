@@ -358,12 +358,6 @@ if choice == "Introdução":
 
 elif choice == "1. Distribuição do Score":
     
-    st.write(""" O score de felicidade foi uma medida obtida em 2015
-             ao se perguntar às pessoas como elas classificariam sua felicidade de 0 a 10.""" )
-    st.write("E esse vai ser a nossa variável pricipal para avaliação")
-    st.write("""Dito isso, o primeiro passo é vermos as estatísticas descritivas sobre 
-             essa variável. Seguem abaixo.
-          """)
     
     
     st.header("1️⃣ Distribuição do Score de Felicidade")
@@ -388,8 +382,8 @@ Mas calma — ainda não dá pra concluir nada com certeza! """)
 ### terçeira seção: gráficos que mostram a a distribuição da variável score ##
 
 
-elif choice == "2. Histogramas e Boxplots":
-    st.header("2️⃣ Histogramas e Boxplots do Score")
+elif choice == "2. Boxplot":
+    st.header("2️⃣ Boxplot do Score")
      
     
     fig, ax = plt.subplots(figsize=(7, 5))
@@ -557,7 +551,7 @@ elif choice == "3. tabela de frequência do score":
 
 
 elif choice == "4. Assimetria":
-    
+    st.header("4️ Assimetria")
     st.write("Agora que temos os dados organizados de uma maneira agradável, vamos ver como ocorre a variação desses dados.")
     st.write("Tomar mão de medidas como:")
 
