@@ -356,23 +356,26 @@ if choice == "Introdução":
 
 elif choice == "1. Distribuição do Score":
     
-    st.write("O score de felicidade foi uma medida obtida em 2015 ao se perguntar as pessoas como elas classificariam sua felicidadede de 0 a 10"
-             )
+    st.write(""" O score de felicidade foi uma medida obtida em 2015
+             ao se perguntar às pessoas como elas classificariam sua felicidade de 0 a 10.""" )
     st.write("E esse vai ser a nossa variável pricipal para avaliação")
-    st.write("dito isso o primeiro passo é vermos as estatisticas descritivas sobre essa variável. Seguem elas abaixo")
+    st.write("""Dito isso, o primeiro passo é vermos as estatísticas descritivas sobre 
+             essa variável. Seguem abaixo.
+          """)
     
     
     st.header("1️⃣ Distribuição do Score de Felicidade")
     st.write(df['Score'].describe())
     st.markdown("""
-    olhando para a tabela acima e tomando o valor do desvio padrão e da média vemos que no primeiro intervalo 
-    de media - menos desvio padrão a media + 1 vez o desvvio padrão vemos que os primeiro e terceiro quartis estão dentro dessa faixa. o que significa que 
-    ao menos 50% dos dados estão nesse intervalo. O o que deixa a hipótese de que essa distribuição obedece a regra empirica 
-    68, 95, 99,7. pode estar muito perto de um adistribuição normal.
+    Olhando para a tabela acima e tomando como referência o valor da média e do desvio padrão, 
+    vemos que, no intervalo entre média - 1 desvio padrão e média + 1 desvio padrão, os primeiro 
+    e terceiro quartis estão incluídos. Isso significa que pelo menos 50% dos dados estão dentro 
+    desse intervalo, o que reforça a hipótese de que a distribuição segue a regra empírica 
+    dos 68, 95, 99,7 — podendo, portanto, estar muito próxima de uma distribuição normal.
     """)
-    st.write("""por outro lado se olhar os valores de média e mediana. tmeos Mediana menor que a média, com uma diferença bem mínima. podemos supor então que 
-            distribuição é fracamente assimetrica a direita. Mas calma, não conclua nada ainda """)
-    st.write("passe para a próxima e vamos explorar mais um puco sobre, analisando os gráficos!! ")
+    st.write("""Por outro lado, se olharmos os valores de média e mediana, temos a mediana ligeiramente menor que a média, com uma diferença bem mínima. Podemos supor, então, que a distribuição é fracamente assimétrica à direita.
+Mas calma — ainda não dá pra concluir nada com certeza! """)
+    st.write("Passe para a próxima e vamos explorar mais um pouco, analisando os gráficos! ")
 
 
 ### terçeira seção: gráficos que mostram a a distribuição da variável score ##
@@ -390,21 +393,23 @@ elif choice == "2. Histogramas e Boxplots":
     
     #exibição dos gráficos e comentario embaixo
     
-    st.write("""Nesse momento vamos buscar evidenciar nossa tese sobre a assimetria da distribuição dos dados 
-             para isso podemos calcular o coeficiente de assimetria para a variável score seguindo o método de Skewness""")
+    st.write("""Nesse momento vamos buscar evidenciar nossa tese sobre a assimetria da distribuição dos 
+             dados 
+             para isso podemos calcular o coeficiente de assimetria para a variável score seguindo o 
+             método de Skewness""")
     #calculo feito com método de skewnes. a função existente no pandas
     skewness = skew(df['Score'])
     
     st.write(f"**Assimetria:** {skewness:.4f}")
-    st.write(f"""como podemos ver o valor do coeficiente de assimetria nos confima nossa suposição. o valor de {skewness:.4f} 
-             mostra uma assimetria fraca e positiva""")
-    st.write("podemos então representar isso graficamente com um box-plot")
+    st.write(f"""Como podemos ver, o valor do coeficiente de assimetria confirma nossa suposição. 
+             O valor de {skewness:.4f} indica uma assimetria fraca e positiva.
+            """)
+    st.write("Podemos, então, representar isso graficamente com um boxplot.")
     
     st.pyplot(fig)
-    st.write("perceba que mesmo com o gráfico a diferença na distribuição é pouco perceptivel. parece até que os daos estão perfeita e igualmente distribuidos. ")
-    st.write("o que faremos na sequência é melhor representar essa distribuição de modo que posssamos enxergar de fato o que está acontecendo.")
-    st.write("vá para a próxima seção")
-    
+    st.write("Perceba que, mesmo com o gráfico, a diferença na distribuição é pouco perceptível. Parece até que os dados estão perfeitamente e igualmente distribuídos.")
+    st.write("O que faremos na sequência é representar melhor essa distribuição, de modo que possamos enxergar de fato o que está acontecendo.")
+    st.write("Vá para a próxima seção.")
     
     #quarta parte: agrupamento dos dados.
 
@@ -412,8 +417,9 @@ elif choice == "2. Histogramas e Boxplots":
 elif choice == "3. tabela de frequência do score":
     st.header("3️⃣ Tabela de frequência do Score")
     
-    st.write(""" como estamos tratando de dados quantitativos contínuos é muito conveniente agrupar esses dados 
-             , criando uma tabela de frequência de classes""")
+    st.write("""Como estamos tratando de dados quantitativos contínuos, é muito conveniente agrupar esses dados,
+ criando uma tabela de frequência de classes.""")
+
     
     #criando a tabela de frequência
         
@@ -438,14 +444,19 @@ elif choice == "3. tabela de frequência do score":
     labels = ['2 |-- 3','3 |-- 4','4 |-- 5','5 |-- 6','6 |-- 7', '7 |--|8']
     frq_tab_score = pd.cut(score, bins=bins, right=False, labels=labels).value_counts().sort_index()
     
-    st.write(f""" Utilizaremos o método de Scott por se aplicar bem a uma quantidade media de dados, para calcular o numero 
-             de classes k ({k}). Daí calculamos a amplitude h de cada classe ({h}). e
-             tomaremos como valor valor ínfimo o piso do menor valor da série; criamos as classes e 
-             distribuimos as ocorrencias.""")
-    st.write("contruindo a tabelo temos:")
+    st.write(f"""Utilizaremos o método de Scott por se aplicar bem a uma quantidade média de dados, para calcular o número 
+    de classes k ({k}). Daí calculamos a amplitude h de cada classe ({h}) e
+    tomaremos como valor ínfimo o piso do menor valor da série; criamos as classes e 
+    distribuímos as ocorrências.""")
+
+    st.write("Construindo a tabela, temos:")
+
     st.write(frq_tab_score)
-    st.write("""olhando a tabela de frequencias podemos observar uma concentração dos dados nas classes de intervalos de 4-5 e 5 a 6""")
-    st.write("para uma melhor leitura vamos contruir um histograma a partir da tabela.")
+
+    st.write("""Olhando a tabela de frequências, podemos observar uma concentração dos dados nas classes de intervalos de 4-5 e 5-6.""")
+
+    st.write("Para uma melhor leitura, vamos construir um histograma a partir da tabela.")
+
     
     #construção do gráfico do histograma######
     labels = [str(interval) for interval in frq_tab_score.index]
@@ -471,10 +482,10 @@ elif choice == "3. tabela de frequência do score":
     
     ####apresentação
     st.pyplot(fig)
-    st.write("agora temos uma melhor visualização da distribuição. podemos calcular para esses dados agrupados as medidasa descritivas")
-    st.write("podemos perceber nesse ponto que há um concentração de observações no vlores de 4 a 6 e que a maior prte dos dados estão concentrados mais a direita ")
-    st.write("a partir dos dados agrupados podemos também refazer os calculos das medidas descritivas e reconstruir o box-plot feito anteriormente ")
-    
+    st.write("Agora temos uma melhor visualização da distribuição. Podemos calcular para esses dados agrupados as medidas descritivas.")
+    st.write("Podemos perceber, neste ponto, que há uma concentração de observações nos valores de 4 a 6 e que a maior parte dos dados está concentrada mais à direita.")
+    st.write("A partir dos dados agrupados, podemos também refazer os cálculos das medidas descritivas e reconstruir o boxplot feito anteriormente.")
+
        ### #média ####
     # 1. Calcular os pontos médios dos intervalos
     classes = list(range(2,9,1))
@@ -502,10 +513,13 @@ elif choice == "3. tabela de frequência do score":
 
     minimo = df2['Classe'].apply(lambda x: x.left).min()
     maximo = df2['Classe'].apply(lambda x: x.right).max()
-    st.write(f"média : \n {AGmedia:.4f}\nQ1:\n{qa1:.4f}\nQ2 (Mediana):\n{qa2:.4f}\nQ3:\n{qa3:.4f}")
-    st.write("""note que o valor de média permanece e mediana mantém sua leve diferença em comparação com os dados
-             não agrupados\n média: {AGmedia:.4f} > Mediana: {qa2:.4f}""")
-    st.write("tendo em mãos essses valores, podemos recriar o boxplot")
+    st.write(f"Média:\n{AGmedia:.4f}\nQ1:\n{qa1:.4f}\nQ2 (Mediana):\n{qa2:.4f}\nQ3:\n{qa3:.4f}")
+
+    st.write(f"""Note que o valor da média permanece e a mediana mantém sua leve diferença em comparação com os dados
+    não agrupados.\nMédia: {AGmedia:.4f} > Mediana: {qa2:.4f}""")
+
+    st.write("Tendo em mãos esses valores, podemos recriar o boxplot.")
+
     #a mediana se mantém minimamente menor que a média. logo não perdemos essa informação dos dados iniciais
 
     boxplot_data = {
@@ -525,19 +539,21 @@ elif choice == "3. tabela de frequência do score":
     ax.grid(True)
     
     
-    st.write("veja abaixo como fica o box-plot para esse agrupamento")
+    st.write("Veja abaixo como fica o boxplot para esse agrupamento.")
     st.pyplot(bxp)
-    st.write("""perceba o 'bigode' da esquerda com um comprimento maior em relação a direita. demonstra que os dados estão mais afastados dos valores mais baixos 
-             logo concentrados nos valores mais a direita""")
+    st.write("""Perceba o 'bigode' da esquerda com comprimento maior em relação ao da direita. Isso demonstra que os dados estão mais afastados dos valores mais baixos,
+            logo concentrados nos valores mais à direita.""")
 
-    st.write("na próxima seção vejamos as variações da variável")
+    st.write("Na próxima seção, vejamos as variações da variável.")
+
 
 
 
 elif choice == "4. Assimetria":
     
-    st.write("agora que temos os dados organizados de uma maneira agradavel, vamos ver como ocorre a variação desses deles")
-    st.write("tomar mão de medidas como:")
+    st.write("Agora que temos os dados organizados de uma maneira agradável, vamos ver como ocorre a variação desses dados.")
+    st.write("Tomar mão de medidas como:")
+
     
     #calculo das medidas de variação 
     #a diferença ainda é minima entre média ou seja fracamente assimétrica. mas nessa forma de apresentação já podemos ver que os dados estão concentrados mais a direita 
@@ -575,13 +591,14 @@ elif choice == "4. Assimetria":
     'Valor': [media,variancia, desvio_padrao, assimetria,curtose_excesso]
     })
     st.write(tabela)
-    st.write("""A média dos dados é 5,45, e a variância é 1,36, com desvio padrão de 1,16 — indicando uma dispersão
-             moderada em torno da média. O coeficiente de assimetria é praticamente zero (0,0267), o que mostra
-             que a distribuição é fracamente assimétrica. Já a curtose é -0,72), o que indica uma distribuição
-             platicúrtica, ou seja, mais achatada que a normal.
-             """)
-    
-    st.write("É possivel visuializar ainda melhor isso no grafico de de curva de densidade")
+    st.write("""A média dos dados é 5,45 e a variância é 1,36, com desvio padrão de 1,16 — indicando uma dispersão
+    moderada em torno da média. O coeficiente de assimetria é praticamente zero (0,0267), o que mostra
+    que a distribuição é fracamente assimétrica. Já a curtose é -0,72, o que indica uma distribuição
+    platicúrtica, ou seja, mais achatada que a normal.
+    """)
+
+    st.write("É possível visualizar ainda melhor isso no gráfico de curva de densidade.")
+
     
     
     #criação da tabela de frequência agrupada para a variável score
@@ -619,11 +636,11 @@ elif choice == "4. Assimetria":
     plt.tight_layout()
     
     st.pyplot(fig2)
-    st.write("""onde podemos ver o achatamento sendo criado pela concentração dos dados nas duas classes centrais""")
-    st.write('''note que apesar do coeficiente de assimetria nos mostrar uma assimetria positiva temos a impressão 
-             que é o oposto. uma solução para esta distorção seria eliminar a primeira classe, pois há apenas 1 pais nela,
-             que cria essa impressão. Mas como nosso intuito é observar todos os paises, vamos deixar essa coluna ai.''')
+    st.write("""Onde podemos ver o achatamento sendo criado pela concentração dos dados nas duas classes centrais.""")
 
+    st.write('''Note que, apesar do coeficiente de assimetria nos mostrar uma assimetria positiva, temos a impressão
+        que é o oposto. Uma solução para esta distorção seria eliminar a primeira classe, pois há apenas 1 país nela,
+        que cria essa impressão. Mas como nosso intuito é observar todos os países, vamos deixar essa coluna aí.''')
 
 #parte da sara e nayla 
 
