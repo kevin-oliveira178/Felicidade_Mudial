@@ -617,7 +617,8 @@ elif choice == "4. Assimetria":
     plt.ylabel("Densidade")
     plt.grid(True)
     plt.tight_layout()
-
+    
+    st.pyplot(fig2)
     st.write("""onde podemos ver o achatamento sendo criado pela concentração dos dados nas duas classes centrais""")
     st.write('''note que apesar do coeficiente de assimetria nos mostrar uma assimetria positiva temos a impressão 
              que é o oposto. uma solução para esta distorção seria eliminar a primeira classe, pois há apenas 1 pais nela,
