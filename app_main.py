@@ -212,6 +212,31 @@ country_to_continent = {
     'ZW': 'Africa'
 }
 
+###### funções internas ####
+
+def calcular_quartil(df, k):
+    N = df['Frequência'].sum()
+    pos = k * N / 4  # posição do quartil (k=1 → Q1, k=2 → Q2...)
+    
+    for i, freq_acum in enumerate(df['Frequência Acumulada']):
+        if freq_acum >= pos:
+            break
+    
+    classe = df.iloc[i]
+    L = classe['Classe'].left
+    F_antes = 0 if i == 0 else df.iloc[i - 1]['Frequência Acumulada']
+    f = classe['Frequência']
+    h = classe['Classe'].right - classe['Classe'].left
+    
+    Q = L + ((pos - F_antes) / f) * h
+    return Q
+
+
+
+
+
+
+
 def add_continent_column(df, country_col):
     def get_continent(country):
         try:
@@ -270,8 +295,8 @@ pages = [
     "Introdução",
     "1. Distribuição do Score",
     "2. Histogramas e Boxplots",
-    "3. Assimetria e Curtose",
-    "4. Score Category",
+    "3. tabela de frequência do score",
+    "4. Assimetria",
     "5. Score x Riqueza",
     "6. GDP vs Vida Saudável",
     "7. Dispersão: GDP x Score",
@@ -280,6 +305,40 @@ pages = [
     "10. Liberdade x Categoria de Felicidade",
     "11. Mapa Múndi de Felicidade"
 ]
+
+
+
+
+###definição de  variáveis globais do app
+score = df["Score"]
+#criação da tabela de frequência agrupada para a variável score
+score.info()
+score = score
+n = len(score)
+s = np.std(score, ddof=1)  # desvio padrão amostral (ddof=1)
+amplitude = score.max() - score.min()
+
+# Calculando largura da classe utilizando método de scott, acredito que por ter acesso aos dados brutos
+# vou encontrar uma presentatovodade melhor nele (bin width)
+
+h = (3.5 * s) / (n ** (1/3))
+
+# Calculando número de classes (bins) e minimos
+k = int(np.ceil(amplitude / h))
+h = int(np.ceil(h))
+min = int(np.floor(score.min()))
+max = int(np.ceil(score.max()))
+
+#definindo intervalos
+bins = list(range(min, max+1,h))
+labels = ['2 |-- 3','3 |-- 4','4 |-- 5','5 |-- 6','6 |-- 7', '7 |--|8']
+frq_tab_score = pd.cut(score, bins=bins, right=False, labels=labels).value_counts().sort_index()
+
+
+
+#bloco de introdução do app 
+
+
 choice = st.sidebar.radio("Escolha uma seção:", pages)
 
 if choice == "Introdução":
@@ -291,56 +350,65 @@ if choice == "Introdução":
     **Fonte:** [Kaggle - World Happiness Report 2019](https://www.kaggle.com/unsdsn/world-happiness)
     """)
 
+## segunda seção: distribuição da variável score
+
+
 
 elif choice == "1. Distribuição do Score":
     st.header("1️⃣ Distribuição do Score de Felicidade")
+    st.markdown("""O score de felicidade foi uma medida, obtida em 2015, ao perguntar as pessoas como elas classificariam sua felicidadede (em uma escala de 0 a 10). E essa vai ser a nossa variável pricipal para avaliação. 
+                Dito isso, o primeiro passo é vermos as estatísticas descritivas sobre essa variável. 
+                Seguem elas abaixo:
+    """)
+  
     st.write(df['Score'].describe())
     st.markdown("""
-    As medidas de tendência central e dispersão mostram que a maioria dos países possuem uma pontuação de felicidade entre 4.5 e 6.5.
-    """)
+     > Olhando para a tabela acima e tomando o valor do desvio padrão e da média, vemos que no primeiro intervalo 
+        de média - menos desvio padrão, a media + 1 vez o desvio padrão vemos que os primeiro e terceiro quartis estão dentro dessa faixa. O que significa que 
+        ao menos 50% dos dados estão nesse intervalo. O que deixa a hipótese de que essa distribuição obedece a regra empírica 
+        (68, 95, 99,7) e pode estar muito perto de uma distribuição normal.
+       * Por outro lado se olhar os valores de média e mediana. Temos Mediana < Média, com uma diferença mínima. Então, podemos supor que 
+        distribuição é fracamente assimetrica a direita. Mas calma, não conclua nada ainda, passe para a próxima e vamos explorar mais um puco sobre, analisando os gráficos!!
+    """) 
+
+
+### terçeira seção: gráficos que mostram a a distribuição da variável score ##
+
 
 elif choice == "2. Histogramas e Boxplots":
     st.header("2️⃣ Histogramas e Boxplots do Score")
-    fig, axs = plt.subplots(1, 2, figsize=(14, 5))
-    sns.histplot(df['Score'], kde=True, ax=axs[0], color='#1f77b4')  # Azul
-    axs[0].set_title("Histograma do Score")
-    sns.boxplot(y=df['Score'], ax=axs[1], color='#ff7f0e')  # Laranja
-    axs[1].set_title("Boxplot do Score")
-    st.pyplot(fig)
+     
+    
+    fig, ax = plt.subplots(figsize=(7, 5))
+    sns.boxplot(x=df['Score'], ax=ax, color='#ff7f0e')
+    ax.set_title("Boxplot do Score")
+    plt.tight_layout()
+    
+    
+    #exibição dos gráficos e comentario embaixo
+        
+    st.markdown("""Nesse momento vamos buscar evidenciar nossa tese sobre a assimetria da distribuição dos dados, 
+                para isso podemos calcular o coeficiente de assimetria para a variável score seguindo o método de Skewness
+        """)
+    #calculo feito com método de skewnes. a função existente no pandas
 
-elif choice == "3. Assimetria e Curtose":
-    st.header("3️⃣ Assimetria e Curtose do Score")
     skewness = skew(df['Score'])
-<<<<<<< Updated upstream
-    kurt = kurtosis(df['Score'])
-    st.write(f"**Assimetria:** {skewness:.2f}")
-    st.write(f"**Curtose:** {kurt:.2f}")
-    st.markdown("""
-    - Assimetria próxima de 0 indica uma distribuição quase simétrica.
-    - Curtose próxima de 0 indica distribuição mesocúrtica (sem caudas pesadas).
-    """)
-=======
     
     st.write(f"**Assimetria:** {skewness:.4f}")
-    st.write(f"""como podemos ver o valor do coeficiente de assimetria nos confima nossa suposição. o valor de {skewness:.4f} 
-             mostra uma assimetria fraca e positiva""")
-    st.write("podemos então representar isso graficamente com um box-plot")
+    st.markdown("""> Como podemos observar, o valor do coeficiente de assimetria nos confima nossa suposição. O valor de {skewness:.4f} 
+             mostra uma assimetria fraca e positiva.
+             * Então, podemos representar isso graficamente com um box-plot:
+    """)
     
-    st.pyplot(fig2)
-    st.write("perceba que mesmo com o gráfico. A essa diferença na distribuição é pouco perceptivel. parece até que os daos estão perfeita e igualmente distribuidos. ")
-    st.write("o que faremos na sequência é melhor representar essa distribuição")
-    
-    
-    
-    #quarta parte: calculo da assimetria e curtose.
+    #quarta parte: agrupamento dos dados.
 
 
 elif choice == "3. tabela de frequência do score":
     st.header("3️⃣ Tabela de frequência do Score")
     
-    st.write(""" como estamos tratando de dados quantitativos contínuos é muito conveniente agrupar esses dados 
-             , criando uma tabela de frequência de classes""")
-    
+    st.markdown(""" 
+             Como estamos tratando de dados quantitativos contínuos, é muito conveniente agrupar esses dados, criando, assim, uma tabela de frequência de classes.
+    """)
     #criando a tabela de frequência
         
     n = len(score)
@@ -364,14 +432,19 @@ elif choice == "3. tabela de frequência do score":
     labels = ['2 |-- 3','3 |-- 4','4 |-- 5','5 |-- 6','6 |-- 7', '7 |--|8']
     frq_tab_score = pd.cut(score, bins=bins, right=False, labels=labels).value_counts().sort_index()
     
-    st.write(f""" Utilizaremos o método de Scott por se aplicar bem a uma quantidade media de dados, para calcular o numero 
-             de classes k ({k}). Daí calculamos a amplitude h de cada classe ({h}). e
-             tomaremos como valor valor ínfimo o piso do menor valor da série; criamos as classes e 
-             distribuimos as ocorrencias.""")
-    st.write("contruindo a tabelo temos:")
+    st.write(f""" Utilizaremos o método de Scott, pois ele é o que melhor se aplicar a uma quantidade média de dados para calcular o número de classes k ({k}). 
+             Então calcula-se a amplitude (h) de cada classe ({h}). 
+             Em seguida tomaremos como valor valor ínfimo o piso do menor valor da série. Então, criamos as classes e 
+             distribuimos as ocorrências.
+             
+             * Construindo a tabela temos:
+             
+    """)
     st.write(frq_tab_score)
-    st.write("""olhando a tabela de frequencias podemos observar uma concentração dos dados nas classes de intervalos de 4-5 e 5 a 6""")
-    st.write("para uma melhor leitura vamos contruir um histograma a partir da tabela.")
+    st.markdown("""Agora, olhando a tabela de frequencias podemos observar uma concentração dos dados nas classes de intervalos de 4 a 5 e 5 a 6
+                Para uma melhor leitura, vamos contruir um histograma a partir da tabela.
+    """)
+  
     
     #construção do gráfico do histograma######
     labels = [str(interval) for interval in frq_tab_score.index]
@@ -392,20 +465,188 @@ elif choice == "3. tabela de frequência do score":
     plt.xlabel('Intervalos de Score')
     plt.ylabel('Frequência')
     plt.title('Histograma por Classes (Score)')
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=360)
     plt.tight_layout()
     
     ####apresentação
-    st.write(fig)
-    st.write("agora temos uma boa visualização da distribuição. podemos calcular para esses dados agrupados as medidasa descritivas")
+    st.pyplot(fig)
+    st.markdown("""Agora temos uma melhor visualização da distribuição. Assim, podemos calcular para esses dados agrupados as medidas descritivas.
+                > Podemos perceber, nesse ponto, que há um concentração de 
+                observações no valores de 4 a 6 e que a maior prte dos dados estão concentrados mais a direita.
+             * A partir dos dados agrupados podemos também refazer os calculos das medidas descritivas e reconstruir o box-plot feito anteriormente:
+    """)
     
->>>>>>> Stashed changes
+       ### #média ####
+    # 1. Calcular os pontos médios dos intervalos
+    classes = list(range(2,9,1))
+    midpoints = [(i+i+1)/2 for i in classes]
 
-elif choice == "4. Score Category":
-    st.header("4️⃣ Classificação por Categoria de Felicidade")
-    freq = df['Score Category'].value_counts()
-    st.write(freq)
-    st.bar_chart(freq)
+    # 2. Frequências
+    frequencias = frq_tab_score.values
+
+    # 3. Produto frequência * ponto médio
+    produto_fx = [f * x for f, x in zip(frequencias, midpoints)]
+
+    # 4. Média
+    AGmedia = sum(produto_fx) / sum(frequencias)
+
+    ###########quartis 
+    #formatar um data frame com as medidas necessárias 
+    classes = pd.IntervalIndex.from_tuples([(2, 3), (3, 4), (4, 5), (5, 6),(6,7),(7,8)])
+    frequencias = frq_tab_score.values
+    df2 = pd.DataFrame({'Classe': classes, 'Frequência': frequencias})
+    df2['Frequência Acumulada'] = df2['Frequência'].cumsum() 
+
+    qa1 = calcular_quartil(df2, 1)  #qa1 são as medidas de posição feitas a partir dos dados agrupados 
+    qa2 = calcular_quartil(df2, 2)  # Mediana
+    qa3 = calcular_quartil(df2, 3)
+
+    minimo = df2['Classe'].apply(lambda x: x.left).min()
+    maximo = df2['Classe'].apply(lambda x: x.right).max()
+    st.write(f"média : \n {AGmedia:.4f}\nQ1:\n{qa1:.4f}\nQ2 (Mediana):\n{qa2:.4f}\nQ3:\n{qa3:.4f}")
+    st.markdown("""
+             > Note que o valor de média permanece, mas mediana revela uma leve diferença em comparação com os dados
+             não agrupados\n média: {AGmedia:.4f} > Mediana: {qa2:.4f}
+             
+             * Tendo em mãos essses valores, podemos recriar o box-plot:
+    """)
+
+    #a mediana se mantém minimamente menor que a média. logo não perdemos essa informação dos dados iniciais
+
+    boxplot_data = {
+        'med': qa2,
+        'q1': qa1,
+        'q3': qa3,
+        'whislo': minimo,
+        'whishi': maximo,
+        'fliers': []  # sem outliers, pois não temos dados individuais
+    }
+
+    bxp, ax = plt.subplots(figsize=(6, 5))
+    ax.axvline(qa2, color='green', linestyle='--', label=f'Mediana = {qa1}')
+    ax.bxp([boxplot_data], showfliers=False, vert=False)  # aqui está a mudança
+    ax.set_title('Boxplot para dados agrupados')
+    ax.set_xlabel('Valores')  # trocar ylabel por xlabel, já que o gráfico fica horizontal
+    ax.grid(True)
+    
+    
+
+    st.pyplot(bxp)
+    st.markdown("""Perceba que o 'bigode' da esquerda possui um comprimento maior em relação ao da direita. 
+             Demonstrando que os dados estão mais afastados dos valores mais baixos, logo, estão mais concentrados nos valores mais a direita.
+             
+             * Na próxima seção veremos as variações da variável.
+    """)
+
+
+
+
+
+elif choice == "4. Assimetria":
+    
+    st.write("""Agora que temos os dados organizados de uma maneira agradável, vamos ver como ocorre a variação deles.
+                Vamos tomar mão de medidas como:  
+    """)
+
+    
+    #calculo das medidas de variação 
+    #a diferença ainda é minima entre média ou seja fracamente assimétrica. mas nessa forma de apresentação já podemos ver que os dados estão concentrados mais a direita 
+
+    classes = [(2, 3), (3, 4), (4, 5), (5, 6),(6,7),(7,8)]
+    frequencias = frq_tab_score.values
+    pontos_medios = [(a + b) / 2 for a, b in classes]
+
+    # Total de elementos
+    n = sum(frequencias)
+
+    # Média
+    media = sum(f * x for f, x in zip(frequencias, pontos_medios)) / n
+
+    # Desvios centralizados
+    desvios = [x - media for x in pontos_medios]
+
+    # Variância
+    variancia = sum(f * (d ** 2) for f, d in zip(frequencias, desvios)) / n
+
+    # Desvio padrão
+    desvio_padrao = np.sqrt(variancia)
+
+    # Coeficiente de assimetria de fisher para dados agrupados 
+    assimetria = sum(f * (d ** 3) for f, d in zip(frequencias, desvios)) / (n * desvio_padrao ** 3)
+
+    # Curtose
+    curtose = sum(f * (d ** 4) for f, d in zip(frequencias, desvios)) / (n * desvio_padrao ** 4)
+
+    # Curtose-excesso (opcional)
+    curtose_excesso = curtose - 3
+
+    tabela = pd.DataFrame({
+    'Medida': ['Média', 'variância', 'desvio padrão', 'coef assimetria','coeficiente de curtose'],
+    'Valor': [media,variancia, desvio_padrao, assimetria,curtose_excesso]
+    })
+    st.write(tabela)
+    st.markdown(""" Analisando o que os dados nos mostra:
+               - **A média dos dados é 5.45** 
+               - ** A variância é 1.36**
+               - **O desvio padrão de 1.16**
+               > Indicando uma dispersão moderada em torno da média. 
+               - **O coeficiente de assimetria é praticamente zero** c = 0.0267
+               > Mostrando que a distribuição é fracamente assimétrica. 
+               - **Já a curtose é -0.72**
+               > O que indica uma distribuição platicúrtica, ou seja, mais achatada que a normal.
+               
+             *  É possivel visuializar ainda melhor isso no gráfico de de curva de densidade:
+    """)
+    
+  
+    
+    
+    #criação da tabela de frequência agrupada para a variável score
+    score.info()
+    score = score
+    n = len(score)
+    s = np.std(score, ddof=1)  # desvio padrão amostral (ddof=1)
+    amplitude = score.max() - score.min()
+
+    # Calculando largura da classe utilizando método de scott, acredito que por ter acesso aos dados brutos
+    # vou encontrar uma presentatovodade melhor nele (bin width)
+
+    h = (3.5 * s) / (n ** (1/3))
+
+    # Calculando número de classes (bins) e minimos
+    k = int(np.ceil(amplitude / h))
+    h = int(np.ceil(h))
+    min = int(np.floor(score.min()))
+    max = int(np.ceil(score.max()))
+
+    #definindo intervalos
+
+    bins = list(range(min, max+1,h))
+    
+    
+    fig2, ax = plt.subplots(figsize=(8, 5))
+    # Histograma com densidade
+    sns.histplot(score, bins=bins, kde=True, stat="density", edgecolor="black", color="lightblue")
+
+    # Personalização
+    plt.title("Histograma com Curva de Frequência (KDE)")
+    plt.xlabel("Score")
+    plt.ylabel("Densidade")
+    plt.grid(True)
+    plt.tight_layout()
+    
+    st.pyplot(fig2)
+    st.markdown("""
+                Aonde podemos ver o achatamento sendo criado pela concentração dos dados nas duas classes centrais.
+                * Note que, apesar do coeficiente de assimetria nos mostrar uma assimetria positiva, temos a impressão 
+             que é o oposto. 
+              Uma solução para esta distorção seria eliminar a primeira classe, pois há apenas 1 país nela, o
+              que cria essa impressão. Mas como nosso intuito é observar todos os países, vamos deixar essa coluna aonde está.
+    """)
+
+
+#parte da sara e nayla 
+
 
 elif choice == "5. Score x Riqueza":
     st.header("5️⃣ Felicidade x Riqueza do País")
